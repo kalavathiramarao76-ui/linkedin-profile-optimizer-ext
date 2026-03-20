@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkedIn Profile Optimizer</title>
+  <style>
+    body { margin: 0; min-height: 100vh; }
+    html:not(.theme-resolved) { background: #09090b; color: #fafafa; }
+    html.theme-resolved { background: var(--surface-0); color: var(--text-primary); }
+  </style>
+  <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('lpo_theme_cache');
+        var mode = stored || 'dark';
+        var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.classList.add('dark');
+        document.documentElement.classList.add('theme-resolved');
+      } catch(e) {
+        document.documentElement.classList.add('dark', 'theme-resolved');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="./main.tsx"></script>
+</body>
+</html>

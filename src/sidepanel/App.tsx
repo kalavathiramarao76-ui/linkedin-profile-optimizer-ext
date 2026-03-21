@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ScoreRing } from '@/ui/components/ScoreRing';
 import { RadarChart } from '@/ui/components/RadarChart';
 import { SectionCard } from '@/ui/components/SectionCard';
@@ -8,9 +8,11 @@ import { ToastContainer } from '@/ui/components/Toast';
 import { useToast } from '@/ui/hooks/useToast';
 import { useStreamingResponse } from '@/ui/hooks/useStreamingResponse';
 import { FavoriteButton } from '@/ui/FavoriteButton';
+import { CommandPalette, useCommandPalette } from '@/ui/CommandPalette';
+import { ExportMenu } from '@/ui/ExportMenu';
 import { getFavoritesCount } from '@/shared/favorites';
 import { ProfileAnalysis, GeneratedHeadline, Settings } from '@/shared/types';
-import { TONES, getScoreColor, getScoreLabel, DEFAULT_ENDPOINT, DEFAULT_MODEL } from '@/shared/constants';
+import { TONES, getScoreColor, getScoreLabel, DEFAULT_ENDPOINT, DEFAULT_MODEL, SECTION_LABELS } from '@/shared/constants';
 
 type Tab = 'analyze' | 'headlines' | 'summary' | 'settings';
 
@@ -31,6 +33,7 @@ export function App() {
   const [favCount, setFavCount] = useState(0);
   const { toasts, addToast, removeToast } = useToast();
   const { streaming, streamedText, startStream, stopStream, setStreamedText } = useStreamingResponse();
+  const { isOpen: cmdOpen, close: cmdClose } = useCommandPalette();
 
   // Load favorites count
   useEffect(() => {
@@ -183,6 +186,52 @@ export function App() {
     }
   }, [addToast]);
 
+  const commands = useMemo(() => [
+    {
+      id: 'analyze', label: 'Analyze Profile',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+      action: () => { setTab('analyze'); if (profileText.trim()) handleAnalyze(); },
+    },
+    {
+      id: 'headlines', label: 'Generate Headlines',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 7h16M4 12h10M4 17h12"/></svg>,
+      action: () => { setTab('headlines'); },
+    },
+    {
+      id: 'summary', label: 'Write Summary',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>,
+      action: () => { setTab('summary'); },
+    },
+    {
+      id: 'favorites', label: 'View Favorites',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>,
+      action: () => { addToast(`You have ${favCount} favorite${favCount !== 1 ? 's' : ''} saved`, 'info'); },
+    },
+    {
+      id: 'theme', label: 'Toggle Theme',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
+      action: () => {
+        const next = settings.theme === 'dark' ? 'light' : 'dark';
+        handleSaveSettings({ theme: next });
+      },
+    },
+    {
+      id: 'settings', label: 'Settings',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>,
+      action: () => setTab('settings'),
+    },
+    {
+      id: 'sidepanel', label: 'Open Side Panel',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/></svg>,
+      action: () => addToast('You are already in the side panel', 'info'),
+    },
+    {
+      id: 'help', label: 'Help',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>,
+      action: () => addToast('Paste your LinkedIn profile text to analyze, generate headlines, or write summaries', 'info'),
+    },
+  ], [profileText, settings, favCount, handleAnalyze, handleSaveSettings, addToast]);
+
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     {
       key: 'analyze', label: 'Analyze',
@@ -214,13 +263,20 @@ export function App() {
           </div>
           <div className="flex-1">
             <h1 className="text-sm font-bold text-text-primary">ProfileForge AI</h1>
-            <p className="text-2xs text-text-tertiary">AI-powered optimization workspace</p>
+            <p className="text-2xs text-text-tertiary">AI-powered optimization workspace <kbd className="px-1 py-0.5 bg-surface-3/60 rounded text-2xs font-mono text-text-tertiary ml-1 no-print" title="Command Palette">&#8984;&#8679;K</kbd></p>
           </div>
           {favCount > 0 && (
             <span className="fav-badge" title={`${favCount} favorite${favCount !== 1 ? 's' : ''}`}>
               {favCount}
             </span>
           )}
+          <ExportMenu
+            analysis={analysis}
+            headlines={headlines}
+            summaryText={streamedText}
+            summaryTone={summaryTone}
+            onToast={addToast}
+          />
           <button onClick={extractFromPage} className="btn-ghost text-xs flex items-center gap-1.5" title="Extract from current LinkedIn page">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
@@ -597,6 +653,62 @@ export function App() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Command Palette */}
+      {cmdOpen && <CommandPalette commands={commands} onClose={cmdClose} />}
+
+      {/* Print-only report */}
+      <div className="print-report" style={{ display: 'none' }}>
+        <h1>ProfileForge AI Analysis Report</h1>
+        <div className="print-subtitle">Generated on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+
+        {analysis && (
+          <>
+            <h2>Profile Score</h2>
+            <div className="print-score">{analysis.overallScore}/100</div>
+            {analysis.topStrengths.length > 0 && (
+              <>
+                <h3>Strengths</h3>
+                <ul>{analysis.topStrengths.map((s, i) => <li key={i}>{s}</li>)}</ul>
+              </>
+            )}
+            <h3>Section Breakdown</h3>
+            {analysis.sections.map(s => (
+              <div key={s.key} className="print-section-row">
+                <span><strong>{SECTION_LABELS[s.key] || s.key}</strong></span>
+                <span>{s.score}/{s.maxScore} ({Math.round((s.score / s.maxScore) * 100)}%)</span>
+              </div>
+            ))}
+            {analysis.topImprovements.length > 0 && (
+              <>
+                <h3>Top Improvements</h3>
+                <ol>{analysis.topImprovements.map((imp, i) => <li key={i}>{imp}</li>)}</ol>
+              </>
+            )}
+          </>
+        )}
+
+        {headlines.length > 0 && (
+          <>
+            <h2>Generated Headlines</h2>
+            {headlines.map((h, i) => (
+              <div key={i} className="print-headline">
+                <strong>{i + 1}. {h.text}</strong>
+                <br /><small>Tone: {h.tone} | Impact: {h.impact}</small>
+              </div>
+            ))}
+          </>
+        )}
+
+        {streamedText && (
+          <>
+            <h2>Generated Summary ({summaryTone})</h2>
+            <div className="print-summary">{streamedText}</div>
+          </>
+        )}
+
+        <div className="print-footer">Generated by ProfileForge AI &mdash; LinkedIn Profile Optimizer</div>
       </div>
 
       {/* Toasts */}

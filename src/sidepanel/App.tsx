@@ -213,7 +213,7 @@ export function App() {
             </svg>
           </div>
           <div className="flex-1">
-            <h1 className="text-sm font-bold text-text-primary">LinkedIn Profile Optimizer</h1>
+            <h1 className="text-sm font-bold text-text-primary">ProfileForge AI</h1>
             <p className="text-2xs text-text-tertiary">AI-powered optimization workspace</p>
           </div>
           {favCount > 0 && (
@@ -587,7 +587,7 @@ export function App() {
               <div className="card">
                 <label className="text-xs font-semibold text-text-secondary mb-2 block">About</label>
                 <p className="text-xs text-text-tertiary">
-                  LinkedIn Profile Optimizer v1.0.0
+                  ProfileForge AI v1.0.0
                 </p>
                 <p className="text-2xs text-text-tertiary mt-1">
                   AI-powered profile analysis and optimization.

@@ -78,8 +78,8 @@ export function App() {
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-bold gradient-text">Profile Optimizer</h1>
-            <p className="text-2xs text-text-tertiary">AI-powered LinkedIn optimization</p>
+            <h1 className="text-lg font-bold gradient-text">ProfileForge AI</h1>
+            <p className="text-2xs text-text-tertiary">AI-powered LinkedIn profile optimization</p>
           </div>
         </div>
       </div>
@@ -226,7 +226,7 @@ export function App() {
       <div className="px-3 py-2 border-t border-border/50">
         <div className="flex items-center justify-between text-2xs text-text-tertiary">
           <span className="flex items-center gap-1.5">
-            LinkedIn Profile Optimizer v1.0
+            ProfileForge AI v1.0
             {favCount > 0 && <span className="fav-badge">{favCount}</span>}
           </span>
           <span className="flex items-center gap-1">

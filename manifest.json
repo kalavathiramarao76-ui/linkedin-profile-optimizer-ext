@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "LinkedIn Profile Optimizer",
-  "description": "AI-powered LinkedIn profile optimization — score, analyze, and improve your profile",
+  "name": "ProfileForge AI — LinkedIn Profile Optimizer & Scorer",
+  "short_name": "ProfileForge AI",
+  "description": "AI LinkedIn profile optimizer: score, analyze & improve your profile. Free Chrome extension for career growth & networking.",
   "version": "1.0.0",
   "icons": {
     "16": "icons/icon-16.png",
@@ -42,7 +43,7 @@
         "default": "Ctrl+Shift+L",
         "mac": "Command+Shift+L"
       },
-      "description": "Open LinkedIn Profile Optimizer"
+      "description": "Open ProfileForge AI"
     }
   },
   "permissions": [

@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo });
-    console.error('[ProfileForge] Uncaught error:', error, errorInfo);
+    console.error('[ProfiluxAI] Uncaught error:', error, errorInfo);
   }
 
   handleRetry = () => {

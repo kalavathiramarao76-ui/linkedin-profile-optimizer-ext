@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "ProfileForge AI — LinkedIn Profile Optimizer & Scorer",
-  "short_name": "ProfileForge AI",
-  "description": "AI LinkedIn profile optimizer: score, analyze & improve your profile. Free Chrome extension for career growth & networking.",
+  "name": "ProfiluxAI \u2014 LinkedIn Profile Optimizer & Scorer",
+  "short_name": "ProfiluxAI",
+  "description": "AI LinkedIn profile optimizer: score, analyze & boost your profile. Free Chrome extension for career growth & personal branding.",
   "version": "1.0.0",
   "icons": {
     "16": "icons/icon-16.png",
@@ -25,8 +25,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.linkedin.com/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://www.linkedin.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -43,7 +47,7 @@
         "default": "Ctrl+Shift+L",
         "mac": "Command+Shift+L"
       },
-      "description": "Open ProfileForge AI"
+      "description": "Open ProfiluxAI"
     }
   },
   "permissions": [

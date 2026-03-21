@@ -1,66 +1,47 @@
-# Chrome Web Store Listing
+# ProfiluxAI — Chrome Web Store Listing
 
 ## Name
-ProfileForge AI — LinkedIn Profile Optimizer & Scorer
+ProfiluxAI — LinkedIn Profile Optimizer & Scorer
 
-## Short Description (132 chars)
-AI LinkedIn profile optimizer: score, analyze & improve your profile. Free Chrome extension for career growth & networking.
+## Short Name
+ProfiluxAI
+
+## Short Description (132 chars max)
+AI LinkedIn profile optimizer: score, analyze & boost your profile. Free Chrome extension for career growth & personal branding.
 
 ## Detailed Description
 
-ProfileForge AI is the ultimate AI-powered LinkedIn profile optimizer Chrome extension. Get an instant profile score, actionable feedback, and data-driven suggestions to make your LinkedIn profile stand out to recruiters, hiring managers, and professional connections.
+### ProfiluxAI — Your AI-Powered Assistant
 
-### Key Features
+ProfiluxAI is a free Chrome extension that brings the power of AI directly into your browser workflow.
 
-- **AI Profile Scoring** — Get a comprehensive 0-100 score across headline, summary, experience, skills, and more
-- **Section-by-Section Analysis** — Detailed breakdown with specific improvement suggestions for every profile section
-- **Keyword Optimization** — Ensure your profile contains the right industry keywords for LinkedIn search visibility
-- **Side Panel Workspace** — Full deep-analysis mode with rich formatting and export options
-- **One-Click Analysis** — Paste your profile text or URL and get results in seconds
-- **Favorites System** — Save and compare multiple profile analyses over time
-- **Dark & Light Themes** — Comfortable viewing in any environment
+**Key Features:**
+- Instant AI-powered analysis and generation
+- Clean, modern interface with dark mode support
+- Side panel workspace for extended sessions
+- Export results as Markdown, HTML, or plain text
+- Keyboard shortcuts for power users
+- 100% free, no account required
 
-### How It Works
+**How it works:**
+1. Install ProfiluxAI from the Chrome Web Store
+2. Click the extension icon or use Ctrl+Shift+K to open
+3. Use the side panel for a full workspace experience
+4. Export or copy results with one click
 
-1. Click the ProfileForge AI icon in your Chrome toolbar
-2. Paste your LinkedIn profile text (headline, summary, experience, skills)
-3. Click "Get Score" for instant AI-powered analysis
-4. Review your section-by-section scores and actionable feedback
-5. Open the Side Panel for a deep dive with detailed recommendations
-
-### Use Cases
-
-- Job seekers optimizing their LinkedIn profile for recruiter searches
-- Professionals building their personal brand on LinkedIn
-- Career coaches helping clients improve their LinkedIn presence
-- Sales professionals optimizing profiles for social selling
-- Students and graduates creating their first professional profile
-
-### Technical Details
-
-- Manifest V3 Chrome extension (latest standard)
-- Works on linkedin.com with content script integration
-- AI analysis powered by advanced language models
-- All data processed securely; no profile data stored on servers
-- Lightweight: minimal impact on browser performance
-
-### Privacy
-
-ProfileForge AI respects your privacy. Profile text is sent to our AI API for analysis only and is not stored permanently. No LinkedIn credentials are accessed or required. See our privacy policy for details.
-
----
-
-**Download ProfileForge AI today and transform your LinkedIn profile into a career-winning asset!**
+**Privacy First:**
+- No data collection or tracking
+- All processing via secure API
+- No account or sign-up required
 
 ## Category
 Productivity
 
 ## Keywords
-linkedin profile optimizer, linkedin AI tool, profile score, linkedin chrome extension, career tool, linkedin automation, professional networking, linkedin helper, linkedin profile analysis, AI productivity tool
+LinkedIn profile optimizer, AI profile scorer, LinkedIn SEO, career growth, personal branding, profile analyzer, LinkedIn tips, resume optimizer, networking tool, profile audit
 
-## Screenshots needed
-1. Popup view showing the profile input area and "Get Score" button with clean dark theme UI
-2. Score results view with the circular score ring and section-by-section breakdown bars
-3. Side panel deep analysis workspace with detailed recommendations
-4. Before/after comparison showing profile score improvement
-5. Dark and light theme toggle demonstration
+## Language
+English
+
+## Version
+1.0.0

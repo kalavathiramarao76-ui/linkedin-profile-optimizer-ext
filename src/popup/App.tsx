@@ -134,7 +134,7 @@ export function App() {
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-bold gradient-text">ProfileForge AI</h1>
+            <h1 className="text-lg font-bold gradient-text">ProfiluxAI</h1>
             <p className="text-2xs text-text-tertiary">AI-powered LinkedIn profile optimization <kbd className="px-1 py-0.5 bg-surface-3/60 rounded text-2xs font-mono text-text-tertiary ml-1" title="Command Palette">&#8984;&#8679;K</kbd></p>
           </div>
         </div>
@@ -290,7 +290,7 @@ export function App() {
       <div className="px-3 py-2 border-t border-border/50">
         <div className="flex items-center justify-between text-2xs text-text-tertiary">
           <span className="flex items-center gap-1.5">
-            ProfileForge AI v1.0
+            ProfiluxAI v1.0
             {favCount > 0 && <span className="fav-badge">{favCount}</span>}
           </span>
           <span className="flex items-center gap-1">

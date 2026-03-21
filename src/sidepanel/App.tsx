@@ -10,9 +10,12 @@ import { useStreamingResponse } from '@/ui/hooks/useStreamingResponse';
 import { FavoriteButton } from '@/ui/FavoriteButton';
 import { CommandPalette, useCommandPalette } from '@/ui/CommandPalette';
 import { ExportMenu } from '@/ui/ExportMenu';
+import { ApiErrorFallback } from '@/ui/ApiErrorFallback';
 import { getFavoritesCount } from '@/shared/favorites';
 import { ProfileAnalysis, GeneratedHeadline, Settings } from '@/shared/types';
 import { TONES, getScoreColor, getScoreLabel, DEFAULT_ENDPOINT, DEFAULT_MODEL, SECTION_LABELS } from '@/shared/constants';
+
+const AVAILABLE_MODELS = ['gpt-oss:120b', 'gpt-oss:20b', 'qwen2.5:3b'];
 
 type Tab = 'analyze' | 'headlines' | 'summary' | 'settings';
 
@@ -29,6 +32,10 @@ export function App() {
     model: DEFAULT_MODEL,
     theme: 'dark',
   });
+
+  const [apiError, setApiError] = useState<string | null>(null);
+  const lastApiActionRef = React.useRef<(() => void) | null>(null);
+  const [clearingData, setClearingData] = useState(false);
 
   const [favCount, setFavCount] = useState(0);
   const { toasts, addToast, removeToast } = useToast();
@@ -87,7 +94,9 @@ export function App() {
     }
     setLoading(true);
     setError('');
+    setApiError(null);
     setAnalysis(null);
+    lastApiActionRef.current = () => handleAnalyze(t);
 
     try {
       const response = await chrome.runtime.sendMessage({
@@ -101,6 +110,7 @@ export function App() {
       }
     } catch (err: any) {
       setError(err.message);
+      setApiError(err.message);
       addToast(err.message, 'error');
     } finally {
       setLoading(false);
@@ -115,6 +125,8 @@ export function App() {
     setLoading(true);
     setHeadlines([]);
     setError('');
+    setApiError(null);
+    lastApiActionRef.current = handleGenerateHeadlines;
 
     try {
       const response = await chrome.runtime.sendMessage({
@@ -128,6 +140,7 @@ export function App() {
       }
     } catch (err: any) {
       setError(err.message);
+      setApiError(err.message);
       addToast(err.message, 'error');
     } finally {
       setLoading(false);
@@ -141,6 +154,8 @@ export function App() {
     }
     setStreamedText('');
     setError('');
+    setApiError(null);
+    lastApiActionRef.current = handleGenerateSummary;
 
     try {
       await startStream(
@@ -160,6 +175,7 @@ export function App() {
       addToast('Summary generated!', 'success');
     } catch (err: any) {
       setError(err.message);
+      setApiError(err.message);
       addToast(err.message, 'error');
     }
   }, [profileText, summaryTone, settings, startStream, addToast, setStreamedText]);
@@ -171,6 +187,31 @@ export function App() {
     await chrome.runtime.sendMessage({ type: 'SAVE_SETTINGS', payload: updated });
     addToast('Settings saved', 'success');
   }, [settings, addToast]);
+
+  const handleClearData = useCallback(async () => {
+    setClearingData(true);
+    try {
+      await chrome.storage.local.clear();
+      setSettings({ endpoint: DEFAULT_ENDPOINT, model: DEFAULT_MODEL, theme: 'dark' });
+      setAnalysis(null);
+      setHeadlines([]);
+      setStreamedText('');
+      setFavCount(0);
+      setProfileText('');
+      applyTheme('dark');
+      addToast('All data cleared', 'success');
+    } catch {
+      addToast('Failed to clear data', 'error');
+    } finally {
+      setClearingData(false);
+    }
+  }, [addToast, setStreamedText]);
+
+  const handleApiRetry = useCallback(() => {
+    setApiError(null);
+    setError('');
+    if (lastApiActionRef.current) lastApiActionRef.current();
+  }, []);
 
   const extractFromPage = useCallback(async () => {
     try {
@@ -247,7 +288,7 @@ export function App() {
     },
     {
       key: 'settings', label: 'Settings',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>,
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>,
     },
   ];
 
@@ -315,7 +356,17 @@ export function App() {
           </div>
         )}
 
-        {error && (
+        {apiError && !loading && (
+          <div className="mx-4 mt-2">
+            <ApiErrorFallback
+              error={apiError}
+              onRetry={handleApiRetry}
+              onDismiss={() => { setApiError(null); setError(''); }}
+            />
+          </div>
+        )}
+
+        {error && !apiError && (
           <div className="mx-4 mt-2 card border-error/30 bg-error/5 animate-slide-up">
             <p className="text-xs text-error">{error}</p>
           </div>
@@ -561,7 +612,68 @@ export function App() {
           {/* === SETTINGS TAB === */}
           {tab === 'settings' && (
             <div className="space-y-4 pt-4">
-              <h2 className="text-sm font-bold text-text-primary">Settings</h2>
+              <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>
+                Settings
+              </h2>
+
+              {/* AI Endpoint */}
+              <div className="card">
+                <label className="text-xs font-semibold text-text-secondary mb-1 block">AI Endpoint</label>
+                <p className="text-2xs text-text-tertiary mb-2">Custom Ollama-compatible endpoint URL</p>
+                <input
+                  type="text"
+                  value={settings.endpoint}
+                  onChange={(e) => setSettings(s => ({ ...s, endpoint: e.target.value }))}
+                  onBlur={() => handleSaveSettings({ endpoint: settings.endpoint })}
+                  className="input-base text-xs font-mono"
+                  placeholder="https://sai.sharedllm.com/v1/chat/completions"
+                />
+                <button
+                  onClick={() => handleSaveSettings({ endpoint: DEFAULT_ENDPOINT })}
+                  className="mt-2 text-2xs text-accent hover:underline"
+                >
+                  Reset to default
+                </button>
+              </div>
+
+              {/* Model */}
+              <div className="card">
+                <label className="text-xs font-semibold text-text-secondary mb-1 block">Model</label>
+                <p className="text-2xs text-text-tertiary mb-2">Select or type a model name</p>
+                <select
+                  value={AVAILABLE_MODELS.includes(settings.model) ? settings.model : '__custom__'}
+                  onChange={(e) => {
+                    if (e.target.value !== '__custom__') {
+                      handleSaveSettings({ model: e.target.value });
+                    }
+                  }}
+                  className="input-base text-xs mb-2 cursor-pointer"
+                  aria-label="Select AI model"
+                >
+                  {AVAILABLE_MODELS.map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                  {!AVAILABLE_MODELS.includes(settings.model) && (
+                    <option value="__custom__">{settings.model} (custom)</option>
+                  )}
+                </select>
+                <div className="flex gap-1.5 flex-wrap">
+                  {AVAILABLE_MODELS.map(m => (
+                    <button
+                      key={m}
+                      onClick={() => handleSaveSettings({ model: m })}
+                      className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
+                        settings.model === m
+                          ? 'bg-accent text-white font-medium shadow-sm shadow-accent/20'
+                          : 'bg-surface-2 text-text-tertiary hover:bg-surface-3 hover:text-text-secondary'
+                      }`}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* Theme */}
               <div className="card">
@@ -571,57 +683,50 @@ export function App() {
                     <button
                       key={t}
                       onClick={() => handleSaveSettings({ theme: t })}
-                      className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
+                      className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
                         settings.theme === t
-                          ? 'bg-accent text-white'
+                          ? 'bg-accent text-white shadow-sm shadow-accent/20'
                           : 'bg-surface-2 text-text-secondary hover:bg-surface-3'
                       }`}
                     >
+                      {t === 'dark' && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>
+                      )}
+                      {t === 'light' && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>
+                      )}
+                      {t === 'system' && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
+                      )}
                       {t.charAt(0).toUpperCase() + t.slice(1)}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Endpoint */}
-              <div className="card">
-                <label className="text-xs font-semibold text-text-secondary mb-2 block">API Endpoint</label>
-                <input
-                  type="text"
-                  value={settings.endpoint}
-                  onChange={(e) => setSettings(s => ({ ...s, endpoint: e.target.value }))}
-                  onBlur={() => handleSaveSettings({ endpoint: settings.endpoint })}
-                  className="input-base text-xs"
-                  placeholder="https://sai.sharedllm.com/v1/chat/completions"
-                />
-              </div>
-
-              {/* Model */}
-              <div className="card">
-                <label className="text-xs font-semibold text-text-secondary mb-2 block">Model</label>
-                <input
-                  type="text"
-                  value={settings.model}
-                  onChange={(e) => setSettings(s => ({ ...s, model: e.target.value }))}
-                  onBlur={() => handleSaveSettings({ model: settings.model })}
-                  className="input-base text-xs"
-                  placeholder="gpt-oss:120b"
-                />
-                <div className="mt-2 space-y-1">
-                  {['gpt-oss:120b', 'gpt-oss:70b', 'gpt-oss:8b'].map(m => (
-                    <button
-                      key={m}
-                      onClick={() => handleSaveSettings({ model: m })}
-                      className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                        settings.model === m
-                          ? 'bg-accent/10 text-accent font-medium'
-                          : 'text-text-tertiary hover:bg-surface-2 hover:text-text-secondary'
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
+              {/* Clear Data */}
+              <div className="card border-error/20">
+                <label className="text-xs font-semibold text-text-secondary mb-1 block">Clear Data</label>
+                <p className="text-2xs text-text-tertiary mb-3">
+                  Remove all favorites, analysis history, and settings. This action cannot be undone.
+                </p>
+                <button
+                  onClick={handleClearData}
+                  disabled={clearingData}
+                  className="px-4 py-2 rounded-xl text-xs font-medium bg-error/10 text-error border border-error/20 hover:bg-error/20 transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {clearingData ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-error/30 border-t-error rounded-full animate-spin" />
+                      Clearing...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
+                      Clear All Data
+                    </>
+                  )}
+                </button>
               </div>
 
               {/* Keyboard shortcuts */}
@@ -642,13 +747,32 @@ export function App() {
               {/* About */}
               <div className="card">
                 <label className="text-xs font-semibold text-text-secondary mb-2 block">About</label>
-                <p className="text-xs text-text-tertiary">
-                  ProfileForge AI v1.0.0
-                </p>
-                <p className="text-2xs text-text-tertiary mt-1">
-                  AI-powered profile analysis and optimization.
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-purple-500 flex items-center justify-center shadow-lg shadow-accent/20">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-text-primary">ProfileForge AI</p>
+                    <p className="text-2xs text-text-tertiary">v1.0.0</p>
+                  </div>
+                </div>
+                <p className="text-2xs text-text-tertiary leading-relaxed">
+                  AI-powered LinkedIn profile analysis and optimization.
                   Scores your profile across 5 key sections, generates headlines, and writes summaries.
                 </p>
+                <div className="mt-3 pt-3 border-t border-border/50 flex gap-3">
+                  <a
+                    href="https://github.com/kalavathiramarao76-ui/linkedin-profile-optimizer-ext"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-2xs text-accent hover:underline flex items-center gap-1"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    GitHub
+                  </a>
+                </div>
               </div>
             </div>
           )}

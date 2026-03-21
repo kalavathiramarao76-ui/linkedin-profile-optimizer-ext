@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScoreRing } from '@/ui/components/ScoreRing';
 import { LoadingSkeleton, ScoreSkeleton } from '@/ui/components/LoadingSkeleton';
 import { ToastContainer } from '@/ui/components/Toast';
 import { useToast } from '@/ui/hooks/useToast';
 import { FavoriteButton } from '@/ui/FavoriteButton';
 import { CommandPalette, useCommandPalette } from '@/ui/CommandPalette';
+import { ApiErrorFallback } from '@/ui/ApiErrorFallback';
 import { getFavoritesCount } from '@/shared/favorites';
 import { ProfileAnalysis } from '@/shared/types';
 import { getScoreColor, getScoreLabel, SECTION_LABELS } from '@/shared/constants';
@@ -14,6 +15,7 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<ProfileAnalysis | null>(null);
   const [error, setError] = useState('');
+  const [apiError, setApiError] = useState<string | null>(null);
   const [favCount, setFavCount] = useState(0);
   const { toasts, addToast, removeToast } = useToast();
   const { isOpen: cmdOpen, close: cmdClose } = useCommandPalette();
@@ -35,6 +37,7 @@ export function App() {
 
     setLoading(true);
     setError('');
+    setApiError(null);
     setAnalysis(null);
 
     try {
@@ -50,6 +53,7 @@ export function App() {
       }
     } catch (err: any) {
       setError(err.message || 'Failed to analyze profile');
+      setApiError(err.message || 'Failed to analyze profile');
       addToast(err.message || 'Analysis failed', 'error');
     } finally {
       setLoading(false);
@@ -187,7 +191,15 @@ export function App() {
 
             {loading && <ScoreSkeleton />}
 
-            {error && (
+            {apiError && !loading && (
+              <ApiErrorFallback
+                error={apiError}
+                onRetry={() => { setApiError(null); setError(''); handleAnalyze(); }}
+                onDismiss={() => { setApiError(null); setError(''); }}
+              />
+            )}
+
+            {error && !apiError && (
               <div className="card border-error/30 bg-error/5 animate-slide-up">
                 <p className="text-xs text-error">{error}</p>
               </div>

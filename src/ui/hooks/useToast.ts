@@ -4,7 +4,7 @@ import { Toast } from '@/shared/types';
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = useCallback((message: string, type: Toast['type'] = 'info', duration = 3000) => {
+  const addToast = useCallback((message: string, type: Toast['type'] = 'info', duration = 4000) => {
     const id = Math.random().toString(36).slice(2);
     setToasts(prev => [...prev, { id, message, type, duration }]);
   }, []);

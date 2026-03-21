@@ -1,8 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ScoreRing } from '@/ui/components/ScoreRing';
 import { LoadingSkeleton, ScoreSkeleton } from '@/ui/components/LoadingSkeleton';
-import { ToastNotification } from '@/ui/components/Toast';
+import { ToastContainer } from '@/ui/components/Toast';
 import { useToast } from '@/ui/hooks/useToast';
+import { FavoriteButton } from '@/ui/FavoriteButton';
+import { getFavoritesCount } from '@/shared/favorites';
 import { ProfileAnalysis } from '@/shared/types';
 import { getScoreColor, getScoreLabel, SECTION_LABELS } from '@/shared/constants';
 
@@ -11,7 +13,17 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<ProfileAnalysis | null>(null);
   const [error, setError] = useState('');
+  const [favCount, setFavCount] = useState(0);
   const { toasts, addToast, removeToast } = useToast();
+
+  useEffect(() => {
+    getFavoritesCount().then(setFavCount);
+  }, []);
+
+  const handleFavToggle = useCallback((added: boolean, count: number) => {
+    setFavCount(count);
+    addToast(added ? 'Added to favorites' : 'Removed from favorites', added ? 'success' : 'info');
+  }, [addToast]);
 
   const handleAnalyze = useCallback(async () => {
     if (!input.trim()) {
@@ -151,7 +163,15 @@ export function App() {
           /* Results */
           <div className="space-y-3 animate-fade-in">
             {/* Score ring */}
-            <div className="flex justify-center py-2">
+            <div className="flex justify-center py-2 relative">
+              <FavoriteButton
+                type="analysis"
+                content={JSON.stringify({ score: analysis.overallScore, timestamp: analysis.timestamp })}
+                label={`Profile Score: ${analysis.overallScore}`}
+                score={analysis.overallScore}
+                onToggle={handleFavToggle}
+                className="absolute top-2 right-0"
+              />
               <ScoreRing score={analysis.overallScore} />
             </div>
 
@@ -205,7 +225,10 @@ export function App() {
       {/* Footer */}
       <div className="px-3 py-2 border-t border-border/50">
         <div className="flex items-center justify-between text-2xs text-text-tertiary">
-          <span>LinkedIn Profile Optimizer v1.0</span>
+          <span className="flex items-center gap-1.5">
+            LinkedIn Profile Optimizer v1.0
+            {favCount > 0 && <span className="fav-badge">{favCount}</span>}
+          </span>
           <span className="flex items-center gap-1">
             <kbd className="px-1.5 py-0.5 bg-surface-3 rounded text-2xs font-mono">Ctrl+Shift+K</kbd>
             <span>Commands</span>
@@ -214,9 +237,7 @@ export function App() {
       </div>
 
       {/* Toasts */}
-      {toasts.map(t => (
-        <ToastNotification key={t.id} toast={t} onRemove={removeToast} />
-      ))}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

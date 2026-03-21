@@ -3,8 +3,15 @@ import { Toast as ToastType } from '@/shared/types';
 
 interface ToastProps {
   toast: ToastType;
+  index: number;
   onRemove: (id: string) => void;
 }
+
+const accentColors = {
+  success: '#22c55e',
+  error: '#ef4444',
+  info: '#6366f1',
+};
 
 const icons = {
   success: (
@@ -27,11 +34,11 @@ const icons = {
   ),
 };
 
-export function ToastNotification({ toast, onRemove }: ToastProps) {
+export function ToastNotification({ toast, index, onRemove }: ToastProps) {
   const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
-    const dur = toast.duration || 3000;
+    const dur = toast.duration || 4000;
     const t = setTimeout(() => {
       setExiting(true);
       setTimeout(() => onRemove(toast.id), 250);
@@ -39,10 +46,61 @@ export function ToastNotification({ toast, onRemove }: ToastProps) {
     return () => clearTimeout(t);
   }, [toast, onRemove]);
 
+  const color = accentColors[toast.type];
+
   return (
-    <div className={`toast ${exiting ? 'toast-exit' : ''}`}>
-      {icons[toast.type]}
-      <span className="text-sm text-text-primary">{toast.message}</span>
+    <div
+      className={`toast-glass ${exiting ? 'toast-exit' : ''}`}
+      style={{
+        bottom: `${16 + index * 60}px`,
+        zIndex: 9999 - index,
+        opacity: index >= 3 ? 0 : 1 - index * 0.08,
+        transform: exiting ? undefined : `scale(${1 - index * 0.03})`,
+      }}
+    >
+      {/* Accent stripe */}
+      <div
+        className="toast-stripe"
+        style={{ backgroundColor: color }}
+      />
+      <div className="flex items-center gap-3 px-4 py-3">
+        {icons[toast.type]}
+        <span className="text-sm text-text-primary flex-1">{toast.message}</span>
+        <button
+          onClick={() => {
+            setExiting(true);
+            setTimeout(() => onRemove(toast.id), 250);
+          }}
+          className="text-text-tertiary hover:text-text-primary transition-colors p-0.5 rounded"
+          aria-label="Dismiss"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
     </div>
+  );
+}
+
+interface ToastContainerProps {
+  toasts: ToastType[];
+  onRemove: (id: string) => void;
+}
+
+export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
+  // Only show last 3 toasts
+  const visible = toasts.slice(-3);
+  return (
+    <>
+      {visible.map((t, i) => (
+        <ToastNotification
+          key={t.id}
+          toast={t}
+          index={visible.length - 1 - i}
+          onRemove={onRemove}
+        />
+      ))}
+    </>
   );
 }

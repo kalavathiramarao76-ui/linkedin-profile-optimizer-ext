@@ -4,9 +4,11 @@ import { RadarChart } from '@/ui/components/RadarChart';
 import { SectionCard } from '@/ui/components/SectionCard';
 import { CopyButton } from '@/ui/components/CopyButton';
 import { LoadingSkeleton, ScoreSkeleton, SectionSkeleton } from '@/ui/components/LoadingSkeleton';
-import { ToastNotification } from '@/ui/components/Toast';
+import { ToastContainer } from '@/ui/components/Toast';
 import { useToast } from '@/ui/hooks/useToast';
 import { useStreamingResponse } from '@/ui/hooks/useStreamingResponse';
+import { FavoriteButton } from '@/ui/FavoriteButton';
+import { getFavoritesCount } from '@/shared/favorites';
 import { ProfileAnalysis, GeneratedHeadline, Settings } from '@/shared/types';
 import { TONES, getScoreColor, getScoreLabel, DEFAULT_ENDPOINT, DEFAULT_MODEL } from '@/shared/constants';
 
@@ -26,8 +28,19 @@ export function App() {
     theme: 'dark',
   });
 
+  const [favCount, setFavCount] = useState(0);
   const { toasts, addToast, removeToast } = useToast();
   const { streaming, streamedText, startStream, stopStream, setStreamedText } = useStreamingResponse();
+
+  // Load favorites count
+  useEffect(() => {
+    getFavoritesCount().then(setFavCount);
+  }, []);
+
+  const handleFavToggle = useCallback((added: boolean, count: number) => {
+    setFavCount(count);
+    addToast(added ? 'Added to favorites' : 'Removed from favorites', added ? 'success' : 'info');
+  }, [addToast]);
 
   // Load extracted profile from content script
   useEffect(() => {
@@ -203,6 +216,11 @@ export function App() {
             <h1 className="text-sm font-bold text-text-primary">LinkedIn Profile Optimizer</h1>
             <p className="text-2xs text-text-tertiary">AI-powered optimization workspace</p>
           </div>
+          {favCount > 0 && (
+            <span className="fav-badge" title={`${favCount} favorite${favCount !== 1 ? 's' : ''}`}>
+              {favCount}
+            </span>
+          )}
           <button onClick={extractFromPage} className="btn-ghost text-xs flex items-center gap-1.5" title="Extract from current LinkedIn page">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
@@ -281,7 +299,15 @@ export function App() {
               {analysis && (
                 <div className="space-y-4 animate-fade-in">
                   {/* Score + Radar */}
-                  <div className="glass-card p-6 flex flex-col items-center gap-4">
+                  <div className="glass-card p-6 flex flex-col items-center gap-4 relative">
+                    <FavoriteButton
+                      type="analysis"
+                      content={JSON.stringify({ score: analysis.overallScore, timestamp: analysis.timestamp })}
+                      label={`Profile Score: ${analysis.overallScore}`}
+                      score={analysis.overallScore}
+                      onToggle={handleFavToggle}
+                      className="absolute top-3 right-3"
+                    />
                     <ScoreRing score={analysis.overallScore} size={160} />
 
                     <div className="flex flex-wrap gap-2 justify-center">
@@ -378,6 +404,13 @@ export function App() {
                             <span className="text-2xs text-text-tertiary">{h.impact}</span>
                           </div>
                         </div>
+                        <FavoriteButton
+                          type="headline"
+                          content={h.text}
+                          label={h.tone}
+                          onToggle={handleFavToggle}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        />
                         <CopyButton text={h.text} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>
@@ -438,9 +471,19 @@ export function App() {
                     <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
                       {summaryTone} Summary
                     </span>
-                    {streamedText && !streaming && (
-                      <CopyButton text={streamedText} />
-                    )}
+                    <div className="flex items-center gap-1">
+                      {streamedText && !streaming && (
+                        <>
+                          <FavoriteButton
+                            type="summary"
+                            content={streamedText}
+                            label={`${summaryTone} summary`}
+                            onToggle={handleFavToggle}
+                          />
+                          <CopyButton text={streamedText} />
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap">
                     {streamedText}
@@ -557,9 +600,7 @@ export function App() {
       </div>
 
       {/* Toasts */}
-      {toasts.map(t => (
-        <ToastNotification key={t.id} toast={t} onRemove={removeToast} />
-      ))}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

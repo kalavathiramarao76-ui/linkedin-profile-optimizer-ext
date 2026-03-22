@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { incrementUsage } from '@/shared/usage';
 import { ScoreRing } from '@/ui/components/ScoreRing';
 import { RadarChart } from '@/ui/components/RadarChart';
 import { SectionCard } from '@/ui/components/SectionCard';
@@ -99,6 +100,7 @@ export function App() {
     lastApiActionRef.current = () => handleAnalyze(t);
 
     try {
+      incrementUsage();
       const response = await chrome.runtime.sendMessage({
         type: 'ANALYZE_PROFILE',
         payload: { profileText: t.trim() },

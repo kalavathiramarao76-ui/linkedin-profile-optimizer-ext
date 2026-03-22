@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProfiluxAI - LinkedIn Profile Optimizer | Chrome Web Store</title>
+<style>
+  :root { --accent: #6366f1; --accent-light: #818cf8; --accent-dark: #4f46e5; --bg: #0f172a; --card: #1e293b; --card-hover: #334155; --text: #f1f5f9; --text-muted: #94a3b8; --border: #334155; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .hero { padding: 80px 0 60px; text-align: center; background: linear-gradient(180deg, rgba(99,102,241,0.15) 0%, transparent 100%); position: relative; }
+  .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, rgba(99,102,241,0.08) 0%, transparent 50%); }
+  .hero-icon { width: 96px; height: 96px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 48px; margin: 0 auto 24px; box-shadow: 0 20px 60px rgba(99,102,241,0.3); position: relative; }
+  .hero h1 { font-size: 56px; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg, #fff, var(--accent-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero .subtitle { font-size: 20px; color: var(--accent-light); font-weight: 600; margin-bottom: 16px; }
+  .hero .tagline { font-size: 18px; color: var(--text-muted); max-width: 600px; margin: 0 auto 32px; }
+  .badge-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .badge { background: var(--card); border: 1px solid var(--border); padding: 8px 16px; border-radius: 100px; font-size: 13px; color: var(--text-muted); }
+  .badge strong { color: var(--accent-light); }
+  .section { padding: 60px 0; }
+  .section-title { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 12px; }
+  .section-desc { text-align: center; color: var(--text-muted); margin-bottom: 48px; font-size: 16px; }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; transition: all 0.3s; }
+  .feature-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.15); }
+  .feature-card .icon { font-size: 32px; margin-bottom: 12px; }
+  .feature-card h3 { font-size: 18px; margin-bottom: 8px; }
+  .feature-card p { font-size: 14px; color: var(--text-muted); }
+  .feature-card .tag { display: inline-block; background: rgba(99,102,241,0.15); color: var(--accent-light); padding: 2px 10px; border-radius: 100px; font-size: 12px; margin-top: 8px; }
+  .flow-steps { display: flex; gap: 0; justify-content: center; flex-wrap: wrap; padding: 20px 0; }
+  .flow-step { display: flex; align-items: center; }
+  .flow-step-content { text-align: center; padding: 20px; }
+  .flow-num { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; margin: 0 auto 12px; }
+  .flow-step-content h4 { font-size: 15px; margin-bottom: 4px; }
+  .flow-step-content p { font-size: 13px; color: var(--text-muted); max-width: 140px; margin: 0 auto; }
+  .flow-arrow { color: var(--accent); font-size: 24px; padding: 0 4px; margin-top: -30px; }
+  .mock-section { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  .mock-window { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .mock-titlebar { background: #0f172a; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+  .mock-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .mock-dot.r { background: #ef4444; } .mock-dot.y { background: #eab308; } .mock-dot.g { background: #22c55e; }
+  .mock-titlebar span { color: var(--text-muted); font-size: 12px; margin-left: 12px; }
+  .mock-body { padding: 20px; }
+  .mock-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
+
+  /* Score Ring */
+  .score-ring-container { text-align: center; margin: 16px 0; }
+  .score-ring { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(var(--accent) 0deg 295deg, var(--border) 295deg 360deg); display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+  .score-ring-inner { width: 80px; height: 80px; background: var(--card); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+  .score-ring-inner .score { font-size: 28px; font-weight: 800; color: var(--accent-light); }
+  .score-ring-inner .label { font-size: 9px; color: var(--text-muted); }
+
+  /* Radar Chart Mock */
+  .radar-mock { width: 200px; height: 200px; margin: 0 auto; position: relative; }
+  .radar-bg { position: absolute; inset: 0; }
+  .radar-bg svg { width: 100%; height: 100%; }
+
+  .dim-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .dim-label { font-size: 11px; color: var(--text-muted); width: 80px; text-align: right; }
+  .dim-bar { flex: 1; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .dim-fill { height: 100%; border-radius: 3px; }
+  .dim-score { font-size: 11px; color: var(--text-muted); width: 35px; }
+
+  .mock-generate { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; width: 100%; margin-top: 8px; }
+
+  /* Headline cards */
+  .headline-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+  .headline-card .hl-text { font-size: 13px; color: var(--text); margin-bottom: 4px; }
+  .headline-card .hl-meta { display: flex; gap: 12px; }
+  .headline-card .hl-tag { font-size: 10px; color: var(--accent-light); background: rgba(99,102,241,0.1); padding: 2px 8px; border-radius: 4px; }
+
+  .store-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 40px; margin-top: 20px; }
+  .store-section h3 { font-size: 20px; margin-bottom: 16px; color: var(--accent-light); }
+  .store-block { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; position: relative; }
+  .store-block h4 { font-size: 14px; color: var(--accent-light); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .store-block p, .store-block li { font-size: 14px; color: var(--text-muted); line-height: 1.8; }
+  .store-block ul { list-style: none; padding: 0; }
+  .store-block ul li::before { content: '✓ '; color: var(--accent-light); font-weight: bold; }
+  .copy-hint { position: absolute; top: 12px; right: 12px; font-size: 11px; color: var(--text-muted); background: var(--card); padding: 2px 8px; border-radius: 4px; }
+  .release-item { border-left: 3px solid var(--accent); padding: 16px 20px; margin-bottom: 16px; background: var(--card); border-radius: 0 8px 8px 0; }
+  .release-item .version { font-size: 14px; font-weight: 700; color: var(--accent-light); }
+  .release-item .date { font-size: 12px; color: var(--text-muted); margin-left: 8px; }
+  .release-item ul { margin-top: 8px; padding-left: 16px; }
+  .release-item li { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+  .divider { height: 1px; background: var(--border); margin: 0; }
+  @media (max-width: 768px) { .hero h1 { font-size: 36px; } .mock-section { grid-template-columns: 1fr; } .flow-steps { flex-direction: column; align-items: center; } .flow-arrow { transform: rotate(90deg); } }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-icon">&#128100;</div>
+    <h1>ProfiluxAI</h1>
+    <div class="subtitle">LinkedIn Profile Optimizer</div>
+    <p class="tagline">AI LinkedIn profile optimizer. Get a profile score, generate better headlines, and write compelling summaries. Stand out to recruiters.</p>
+    <div class="badge-row">
+      <div class="badge"><strong>5</strong> Section Analysis</div>
+      <div class="badge"><strong>100</strong> Point Score</div>
+      <div class="badge"><strong>10</strong> Headlines</div>
+      <div class="badge"><strong>3</strong> Summary Tones</div>
+      <div class="badge"><strong>4</strong> Export Formats</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Powerful Features</h2>
+    <p class="section-desc">Comprehensive AI analysis to make your LinkedIn profile stand out</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="icon">&#128202;</div>
+        <h3>5-Section Analysis</h3>
+        <p>Deep analysis of Headline, Summary, Experience, Skills, and Keywords. Each section scored out of 20 points for a total of 100.</p>
+        <span class="tag">20 pts each</span>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#127919;</div>
+        <h3>Animated Score Ring + Radar</h3>
+        <p>Beautiful animated score ring with overall profile score and radar chart showing strengths across all 5 dimensions.</p>
+        <span class="tag">Visual Analytics</span>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#9997;&#65039;</div>
+        <h3>Headline Generator</h3>
+        <p>Generate 10 alternative headlines with tone labels and impact scores. Find the headline that gets you noticed.</p>
+        <span class="tag">10 Options</span>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#128221;</div>
+        <h3>Summary Writer</h3>
+        <p>AI writes your LinkedIn summary in 3 tones: Professional, Creative, or Executive. Tailored to your experience.</p>
+        <span class="tag">3 Tones</span>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#128269;</div>
+        <h3>Profile Extraction</h3>
+        <p>Automatically extract your LinkedIn profile data with one click. No copy-paste needed — works directly on LinkedIn.</p>
+        <span class="tag">Auto-Extract</span>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#128190;</div>
+        <h3>History & Export</h3>
+        <p>Keep up to 20 analysis results in history. Export as Markdown, HTML, TXT, or PDF. Command palette for quick access.</p>
+        <span class="tag">4 Formats</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-desc">Optimize your profile in 6 steps</p>
+    <div class="flow-steps">
+      <div class="flow-step"><div class="flow-step-content"><div class="flow-num">1</div><h4>Visit Profile</h4><p>Go to any LinkedIn profile</p></div></div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step"><div class="flow-step-content"><div class="flow-num">2</div><h4>Click Optimize</h4><p>Press the injected button</p></div></div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step"><div class="flow-step-content"><div class="flow-num">3</div><h4>Auto-Extract</h4><p>Profile data is captured</p></div></div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step"><div class="flow-step-content"><div class="flow-num">4</div><h4>Score + Radar</h4><p>See your 100-pt score</p></div></div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step"><div class="flow-step-content"><div class="flow-num">5</div><h4>Headlines</h4><p>Generate 10 alternatives</p></div></div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step"><div class="flow-step-content"><div class="flow-num">6</div><h4>Summary</h4><p>Write compelling summary</p></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">See It in Action</h2>
+    <p class="section-desc">Profile score dashboard and headline generator</p>
+    <div class="mock-section">
+      <div>
+        <p class="mock-label">PROFILE SCORE</p>
+        <div class="mock-window">
+          <div class="mock-titlebar">
+            <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+            <span>ProfiluxAI - Analysis</span>
+          </div>
+          <div class="mock-body">
+            <div class="score-ring-container">
+              <div class="score-ring"><div class="score-ring-inner"><div class="score">82</div><div class="label">/ 100</div></div></div>
+            </div>
+            <div style="margin-top:16px">
+              <div class="dim-row"><span class="dim-label">Headline</span><div class="dim-bar"><div class="dim-fill" style="width:85%;background:var(--accent)"></div></div><span class="dim-score">17/20</span></div>
+              <div class="dim-row"><span class="dim-label">Summary</span><div class="dim-bar"><div class="dim-fill" style="width:80%;background:var(--accent)"></div></div><span class="dim-score">16/20</span></div>
+              <div class="dim-row"><span class="dim-label">Experience</span><div class="dim-bar"><div class="dim-fill" style="width:90%;background:var(--accent-light)"></div></div><span class="dim-score">18/20</span></div>
+              <div class="dim-row"><span class="dim-label">Skills</span><div class="dim-bar"><div class="dim-fill" style="width:75%;background:#818cf8"></div></div><span class="dim-score">15/20</span></div>
+              <div class="dim-row"><span class="dim-label">Keywords</span><div class="dim-bar"><div class="dim-fill" style="width:80%;background:var(--accent)"></div></div><span class="dim-score">16/20</span></div>
+            </div>
+            <button class="mock-generate" style="margin-top:16px">&#9997;&#65039; Generate Headlines</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="mock-label">HEADLINE GENERATOR</p>
+        <div class="mock-window">
+          <div class="mock-titlebar">
+            <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+            <span>ProfiluxAI - Headlines</span>
+          </div>
+          <div class="mock-body">
+            <div class="headline-card">
+              <div class="hl-text">Senior Software Engineer | Building scalable systems at Fortune 500</div>
+              <div class="hl-meta"><span class="hl-tag">Professional</span><span class="hl-tag">Impact: 9/10</span></div>
+            </div>
+            <div class="headline-card">
+              <div class="hl-text">I help teams ship 10x faster | Engineering Leader & System Architect</div>
+              <div class="hl-meta"><span class="hl-tag">Creative</span><span class="hl-tag">Impact: 8/10</span></div>
+            </div>
+            <div class="headline-card">
+              <div class="hl-text">VP Engineering | Scaling teams from 5 to 50 | Ex-Google, Ex-Meta</div>
+              <div class="hl-meta"><span class="hl-tag">Executive</span><span class="hl-tag">Impact: 9/10</span></div>
+            </div>
+            <div class="headline-card">
+              <div class="hl-text">Full-Stack Developer turning coffee into code & ideas into products</div>
+              <div class="hl-meta"><span class="hl-tag">Casual</span><span class="hl-tag">Impact: 7/10</span></div>
+            </div>
+            <div style="text-align:center;color:var(--text-muted);font-size:12px;margin-top:8px">+6 more headlines available</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">What's New</h2>
+    <p class="section-desc">Latest updates and improvements</p>
+    <div class="release-item">
+      <span class="version">v1.0.0</span><span class="date">March 2026</span>
+      <ul>
+        <li>Initial release with 5-section profile analysis (100 point scale)</li>
+        <li>Animated score ring and radar chart visualization</li>
+        <li>Headline generator with 10 alternatives, tone labels, and impact scores</li>
+        <li>Summary writer with 3 tones: Professional, Creative, Executive</li>
+        <li>One-click profile extraction from LinkedIn</li>
+        <li>Analysis history supporting up to 20 entries</li>
+        <li>Export to Markdown, HTML, TXT, and PDF</li>
+        <li>Command palette (Ctrl+K) for quick access to all features</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section">
+  <div class="container">
+    <div class="store-section">
+      <h3>&#127983; Chrome Web Store Listing (Copy-Paste Ready)</h3>
+      <div class="store-block">
+        <span class="copy-hint">&#128203; Copy</span>
+        <h4>Short Description (132 chars)</h4>
+        <p>AI LinkedIn profile optimizer. Get a profile score, generate better headlines, and write compelling summaries. Stand out to recruiters.</p>
+      </div>
+      <div class="store-block">
+        <span class="copy-hint">&#128203; Copy</span>
+        <h4>Detailed Description</h4>
+        <p>ProfiluxAI is an AI-powered LinkedIn profile optimizer that analyzes your profile across 5 key sections and gives you actionable recommendations to stand out to recruiters and connections.</p>
+        <br>
+        <p><strong>5-Section Analysis:</strong> Your profile is scored across Headline, Summary, Experience, Skills, and Keywords — each worth 20 points for a comprehensive 100-point total score.</p>
+        <br>
+        <p><strong>Visual Analytics:</strong> Beautiful animated score ring and radar chart show your strengths and weaknesses at a glance.</p>
+        <br>
+        <p><strong>Headline Generator:</strong> Generate 10 alternative headlines with tone labels (Professional, Creative, Executive, Casual) and impact scores to find the perfect headline.</p>
+        <br>
+        <p><strong>Summary Writer:</strong> AI writes your LinkedIn summary in 3 tones — Professional, Creative, or Executive — tailored to your experience and goals.</p>
+        <br>
+        <p><strong>Auto-Extract:</strong> One-click profile extraction directly from LinkedIn. No copy-paste needed.</p>
+        <br>
+        <p><strong>History & Export:</strong> Save up to 20 analysis results and export as Markdown, HTML, TXT, or PDF.</p>
+      </div>
+      <div class="store-block">
+        <span class="copy-hint">&#128203; Copy</span>
+        <h4>Feature Bullet Points</h4>
+        <ul>
+          <li>5-section profile analysis: Headline, Summary, Experience, Skills, Keywords (20 pts each)</li>
+          <li>Animated score ring and radar chart visualization</li>
+          <li>Headline generator with 10 alternatives and impact scores</li>
+          <li>Summary writer in 3 tones: Professional, Creative, Executive</li>
+          <li>One-click profile extraction from LinkedIn</li>
+          <li>Analysis history with up to 20 saved results</li>
+          <li>Export to Markdown, HTML, TXT, and PDF</li>
+          <li>Command palette (Ctrl+K) for instant feature access</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div style="text-align:center; padding: 40px; color: var(--text-muted); font-size: 13px;">
+  ProfiluxAI &mdash; LinkedIn Profile Optimizer &mdash; Chrome Extension
+</div>
+
+</body>
+</html>

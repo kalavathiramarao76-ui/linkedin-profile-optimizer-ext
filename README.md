@@ -1,3 +1,5 @@
+<p align="center"><img src="src/assets/icons/logo.svg" width="128" height="128" alt="ProfiluxAI Logo"></p>
+
 # ProfiluxAI — AI LinkedIn Profile Optimizer
 
 ![Version](https://img.shields.io/badge/version-1.0.0-6366F1)
@@ -132,11 +134,12 @@ linkedin-profile-optimizer-ext/
 ## Screenshots
 
 <p align="center">
-  <img src="src/assets/icons/icon-128.png" alt="ProfiluxAI Icon" width="128" height="128" />
+  <img src="src/assets/icons/logo.svg" alt="ProfiluxAI Logo" width="128" height="128" />
 </p>
 
-| Icon Size | Path |
+| Icon | Path |
 |---|---|
+| SVG Logo | `src/assets/icons/logo.svg` |
 | 16x16 | `src/assets/icons/icon-16.png` |
 | 48x48 | `src/assets/icons/icon-48.png` |
 | 128x128 | `src/assets/icons/icon-128.png` |

@@ -1,34 +1,99 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#4f46e5"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4338ca"/>
+      <stop offset="100%" stop-color="#312e81"/>
     </linearGradient>
-    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="rgba(255,255,255,0.2)"/>
-      <stop offset="50%" stop-color="rgba(255,255,255,0)"/>
+    <linearGradient id="bg-sheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#818cf8" stop-opacity="0.25"/>
+      <stop offset="50%" stop-color="#4338ca" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#312e81" stop-opacity="0"/>
     </linearGradient>
+    <linearGradient id="gem-highlight" x1="0.3" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#c7d2fe" stop-opacity="0.8"/>
+    </linearGradient>
+    <radialGradient id="crown-glow" cx="0.5" cy="0.15" r="0.25">
+      <stop offset="0%" stop-color="#e0e7ff" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#4338ca" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="silhouette-clip">
+      <path d="M64 22 Q52 22 48 32 Q44 42 46 50 Q47 56 52 60 Q48 62 38 68 Q28 74 26 86 L26 98 Q26 102 30 102 L98 102 Q102 102 102 98 L102 86 Q100 74 90 68 Q80 62 76 60 Q81 56 82 50 Q84 42 80 32 Q76 22 64 22 Z"/>
+    </clipPath>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
+
   <!-- Background -->
   <rect width="128" height="128" rx="28" fill="url(#bg)"/>
-  <!-- Shine overlay -->
-  <rect width="128" height="128" rx="28" fill="url(#shine)"/>
-  <!-- Person silhouette -->
-  <g fill="white">
-    <!-- Head -->
-    <circle cx="64" cy="48" r="16"/>
-    <!-- Body/shoulders -->
-    <path d="M34,100 C34,80 44,72 64,72 C84,72 94,80 94,100 L94,104 L34,104 Z"/>
+  <rect width="128" height="128" rx="28" fill="url(#bg-sheen)"/>
+  <rect width="128" height="128" rx="28" fill="url(#crown-glow)"/>
+
+  <!-- Profile silhouette with gem facets inside -->
+  <g filter="url(#shadow)">
+    <path d="M64 22 Q52 22 48 32 Q44 42 46 50 Q47 56 52 60 Q48 62 38 68 Q28 74 26 86 L26 98 Q26 102 30 102 L98 102 Q102 102 102 98 L102 86 Q100 74 90 68 Q80 62 76 60 Q81 56 82 50 Q84 42 80 32 Q76 22 64 22 Z" fill="url(#gem-highlight)" opacity="0.92"/>
+
+    <!-- Gem facet lines inside silhouette -->
+    <g clip-path="url(#silhouette-clip)" opacity="0.25" stroke="#4338ca" stroke-width="1" fill="none">
+      <line x1="64" y1="22" x2="52" y2="42"/>
+      <line x1="64" y1="22" x2="76" y2="42"/>
+      <line x1="52" y1="42" x2="76" y2="42"/>
+      <line x1="64" y1="22" x2="64" y2="42"/>
+      <line x1="48" y1="32" x2="64" y2="42"/>
+      <line x1="80" y1="32" x2="64" y2="42"/>
+      <line x1="52" y1="42" x2="52" y2="60"/>
+      <line x1="76" y1="42" x2="76" y2="60"/>
+      <line x1="64" y1="42" x2="52" y2="60"/>
+      <line x1="64" y1="42" x2="76" y2="60"/>
+      <line x1="52" y1="60" x2="26" y2="86"/>
+      <line x1="76" y1="60" x2="102" y2="86"/>
+      <line x1="52" y1="60" x2="64" y2="80"/>
+      <line x1="76" y1="60" x2="64" y2="80"/>
+      <line x1="64" y1="80" x2="26" y2="102"/>
+      <line x1="64" y1="80" x2="102" y2="102"/>
+      <line x1="38" y1="68" x2="64" y2="80"/>
+      <line x1="90" y1="68" x2="64" y2="80"/>
+      <line x1="38" y1="68" x2="38" y2="102"/>
+      <line x1="90" y1="68" x2="90" y2="102"/>
+      <line x1="52" y1="60" x2="38" y2="102"/>
+      <line x1="76" y1="60" x2="90" y2="102"/>
+      <line x1="64" y1="80" x2="50" y2="102"/>
+      <line x1="64" y1="80" x2="78" y2="102"/>
+    </g>
+
+    <!-- Light refraction accents -->
+    <g clip-path="url(#silhouette-clip)" opacity="0.12" fill="#4338ca">
+      <polygon points="64,22 52,42 64,42"/>
+      <polygon points="52,60 38,68 64,80"/>
+      <polygon points="76,60 90,68 64,80"/>
+      <polygon points="64,80 78,102 90,102 90,68"/>
+    </g>
   </g>
-  <!-- Star/sparkle above head -->
-  <g fill="white" transform="translate(56, 14)">
-    <path d="M8,0 L10,5 L16,6 L11,10 L12,16 L8,13 L4,16 L5,10 L0,6 L6,5 Z"/>
+
+  <!-- Crown/star at top of head -->
+  <g filter="url(#glow)">
+    <path d="M64 12 L66.5 17 L72 17.5 L68 21 L69 26.5 L64 24 L59 26.5 L60 21 L56 17.5 L61.5 17 Z" fill="#ffffff" opacity="0.9"/>
   </g>
-  <!-- Small sparkle accents -->
-  <g fill="white" opacity="0.6" transform="translate(82, 32)">
-    <path d="M4,0 L5,3 L8,4 L5,5 L4,8 L3,5 L0,4 L3,3 Z"/>
+
+  <!-- Sparkle at crown point -->
+  <g filter="url(#glow)" opacity="0.7">
+    <line x1="64" y1="7" x2="64" y2="11" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="60" y1="9" x2="68" y2="9" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
   </g>
-  <g fill="white" opacity="0.4" transform="translate(38, 28)">
-    <path d="M3,0 L3.8,2.2 L6,3 L3.8,3.8 L3,6 L2.2,3.8 L0,3 L2.2,2.2 Z"/>
+
+  <!-- Small accent sparkles -->
+  <g fill="#ffffff" opacity="0.4">
+    <circle cx="28" cy="40" r="1.2"/>
+    <circle cx="100" cy="38" r="1"/>
+    <circle cx="22" cy="60" r="0.8"/>
+    <circle cx="106" cy="58" r="0.9"/>
   </g>
 </svg>
